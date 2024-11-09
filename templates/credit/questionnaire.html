@@ -1,0 +1,84 @@
+{% extends "home/base.html" %}
+
+{% block base %}
+<div id="questionModal" class="modal fade show" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="display: block;">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Question</h5>
+      </div>
+      <div class="modal-body">
+        <p id="questionText" class="mb-3"></p>
+        <form id="questionForm" method="POST">
+          {% csrf_token %}
+          <div class="form-check">
+            <input type="radio" class="form-check-input" name="answer" value="A" id="answerA">
+            <label class="form-check-label" for="answerA">Sometimes</label>
+          </div>
+          <div class="form-check">
+            <input type="radio" class="form-check-input" name="answer" value="B" id="answerB">
+            <label class="form-check-label" for="answerB">Never</label>
+          </div>
+          <div class="form-check">
+            <input type="radio" class="form-check-input" name="answer" value="C" id="answerC">
+            <label class="form-check-label" for="answerC">Always</label>
+          </div>
+          <div class="form-check">
+            <input type="radio" class="form-check-input" name="answer" value="D" id="answerD">
+            <label class="form-check-label" for="answerD">Nil</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-dark" onclick="submitAnswer()">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentQuestion = 0;
+  const questions = JSON.parse('{{ questions_json|escapejs }}');  
+  console.log(questions, 'questions');
+
+  function getCSRFToken() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    return csrfToken;
+  }
+
+  function loadQuestion() {
+    if (questions.length > 0) {
+      document.getElementById("questionText").textContent = questions[currentQuestion].fields.text;  
+    }
+  }
+
+  function submitAnswer() {
+    const answer = document.querySelector('input[name="answer"]:checked')?.value;
+    if (answer) {
+      fetch("http://127.0.0.1:8000/submit_answer/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken()  
+        },
+        body: JSON.stringify({ question_id: questions[currentQuestion].pk, answer: answer }),
+      }).then(response => {
+        if (response.ok) {
+          currentQuestion += 1;
+          if (currentQuestion < questions.length) {
+            loadQuestion();
+          } else {
+            window.location.href = "http://127.0.0.1:8000/results/";
+          }
+        } else {
+          alert('Error submitting answer');
+        }
+      });
+    } else {
+      alert('Please select an answer.');
+    }
+  }
+
+  window.onload = loadQuestion;
+</script>
+{% endblock %}

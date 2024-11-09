@@ -1,0 +1,48 @@
+{% extends "home/base.html" %}
+{% block base %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg">
+                <div class="card-body p-4">
+                    <h1 class="text-center mb-4">Login</h1>
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" id="password" required>
+                        </div>
+                        <p>New User? <a href={% url "register" %}>Register</a></p>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-dark w-100">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section to display messages -->
+{% if messages %}
+    <ul id="messages" style="display: none;">
+        {% for message in messages %}
+            <li class="message" data-message="{{ message }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<!-- JavaScript to display messages as popups -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const messages = document.querySelectorAll("#messages .message");
+        messages.forEach((message) => {
+            alert(message.dataset.message);  // Display each message as an alert popup
+        });
+    });
+</script>
+{% endblock base %}
